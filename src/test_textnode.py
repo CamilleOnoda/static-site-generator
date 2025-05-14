@@ -67,5 +67,10 @@ class TestTextNode(unittest.TestCase):
         node2 = TextNode("This a link node", TextType.LINK, "http://www.example.com")
         self.assertNotEqual(node,node2)
 
+    def test_type_consistency(self):
+        node = TextNode("This is a text node", TextType.TEXT)
+        not_a_node = "not a node"
+        self.assertNotEqual(node, not_a_node)
+
 if __name__ == "__main__":
     unittest.main()
