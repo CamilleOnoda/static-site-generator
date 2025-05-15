@@ -30,3 +30,6 @@ class HTMLNode():
         for key, value in self.props.items():
             string_attributes += f" {key}" + "=" + f'"{value}"'
         return string_attributes
+    
+    def __repr__(self):
+        return f'HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})'
