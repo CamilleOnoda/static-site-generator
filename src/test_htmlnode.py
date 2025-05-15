@@ -10,4 +10,8 @@ class TestHTMLNode(unittest.TestCase):
         node = HTMLNode(props=attr_dict)
         str_repr = ' href="website link" target="_blank"'
         self.assertEqual(node.props_to_html(), str_repr)
+
+    def test_htmlNode_object(self):
+        node = HTMLNode("h1","hello world")
+        self.assertEqual(node.__repr__(),"HTMLNode(h1, hello world, None, None)")
         
