@@ -72,5 +72,9 @@ class TestTextNode(unittest.TestCase):
         not_a_node = "not a node"
         self.assertNotEqual(node, not_a_node)
 
+    def test_textnode_object(self):
+        node = TextNode("This a link node", TextType.LINK)
+        self.assertEqual(node.__repr__(), "TextNode(This a link node, link, None)")
+
 if __name__ == "__main__":
     unittest.main()
