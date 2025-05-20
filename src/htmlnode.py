@@ -4,28 +4,13 @@ class HTMLNode():
         self.value = value
         self.children = children
         self.props = props
-
-    def to_html(self):
-        if self.tag is None:
-            return self.value
-        return f"<{self.tag}>{self.value}</{self.tag}>"
     
     def props_to_html(self):
-        """Return a string that represents the HTML attributes of the node.
-        
-        If self.props:
-        
-        {
-            "href": "website link",
-            "target": "_blank",
-        }
-        
-        Then self.props_to_html() should return:
-         href="website link" target="_blank"
-
-        Notice the leading space character before href and before target.
+        """Returns a string that represents the HTML attributes of the node.
         """
-
+        if self.props is None:
+            return ""
+        
         string_attributes = ""
         for key, value in self.props.items():
             string_attributes += f" {key}" + "=" + f'"{value}"'
@@ -33,6 +18,15 @@ class HTMLNode():
     
     def __repr__(self):
         return f'HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})'
+
+    def to_html(self):
+        """Returns a leaf node as an html string"""
+        if self.tag is None:
+            return self.value
+        if self.props:
+            props_string = self.props_to_html()
+            return f"<{self.tag}{props_string}>{self.value}</{self.tag}>"
+        return f"<{self.tag}>{self.value}</{self.tag}>"
 
 
 class LeafNode(HTMLNode):
