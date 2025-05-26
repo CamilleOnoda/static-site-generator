@@ -2,6 +2,8 @@ import unittest
 from htmlnode import HTMLNode, LeafNode, ParentNode
 
 class TestHTMLNode(unittest.TestCase):
+# Tests for the HTMLNode class
+
     def test_props_to_html(self):
         attr_dict = {
             "href": "website link",
@@ -23,6 +25,8 @@ class TestHTMLNode(unittest.TestCase):
         node = HTMLNode("h1","hello world",)
         self.assertEqual(node.props,None)
 
+# Tests for the LeafNode class
+
     def test_leaf_to_html_p(self):
         node = LeafNode("p", "Hello, world!")
         self.assertEqual(node.to_html(),
@@ -42,6 +46,13 @@ class TestHTMLNode(unittest.TestCase):
         node = LeafNode("p", "hello world")
         self.assertEqual(node.__repr__(), 
                          "LeafNode(p, hello world, None)")
+
+# Tests for the ParentNode class
+
+    def test_parentNode_object(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.__repr__(), f"ParentNode(div, children: [LeafNode(span, child, None)], None)")
 
     def test_to_html_with_children(self):
         child_node = LeafNode("span", "child")
