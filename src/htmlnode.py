@@ -6,7 +6,7 @@ class HTMLNode():
         self.props = props
 
     def to_html(self):
-        # Act as a safeguard, ensuring all subclasses implement their own to_html()
+        # Ensure all subclasses implement their own to_html()
         raise NotImplementedError("to_html method not implemented")
     
     def props_to_html(self):
@@ -39,8 +39,8 @@ class LeafNode(HTMLNode):
         if self.tag is None:
             return self.value
         if self.props:
-            props_string = self.props_to_html()
-            return f"<{self.tag}{props_string}>{self.value}</{self.tag}>"
+            props_str = self.props_to_html()
+            return f"<{self.tag}{props_str}>{self.value}</{self.tag}>"
         return f"<{self.tag}>{self.value}</{self.tag}>"
     
     def __repr__(self):
@@ -56,10 +56,18 @@ class ParentNode(HTMLNode):
         if self.tag is None:
             raise ValueError("The ParentNode subclass requires a tag.")
         if self.children is None:
-            raise ValueError("The ParentNode subclass must have children.")       
+            raise ValueError("The ParentNode subclass must have children.")
+
+        concat_str = ""       
         for child in self.children:
-            result = child.to_html()
-        return f'<{self.tag}>{result}</{self.tag}>'
+            concat_str += child.to_html()
+        if self.props:
+            props_str = self.props_to_html()
+            return f'<{self.tag}{props_str}>{concat_str}</{self.tag}>'
+        return f'<{self.tag}>{concat_str}</{self.tag}>'
+    
+    def __repr__(self):
+        return f'ParentNode({self.tag}, children: {self.children}, {self.props})'
 
         
        
