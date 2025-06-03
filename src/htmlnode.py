@@ -28,20 +28,17 @@ class LeafNode(HTMLNode):
             raise ValueError("The LeafNode subclass requires a value.")
         super().__init__(tag=tag, value=value, props=props, children=[])
 
-    def add_child(self,child):
+    def add_child(self, child):
         raise Exception("LeafNode can not have children!")
     
-    def add_children(self,children):
+    def add_children(self, children):
         raise Exception("LeafNode can not have children!")
     
     def to_html(self):
         """Returns a leaf node as an html string"""
         if self.tag is None:
             return self.value
-        if self.props:
-            props_str = self.props_to_html()
-            return f"<{self.tag}{props_str}>{self.value}</{self.tag}>"
-        return f"<{self.tag}>{self.value}</{self.tag}>"
+        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
     
     def __repr__(self):
         return f'LeafNode({self.tag}, {self.value}, {self.props})'
