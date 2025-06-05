@@ -40,13 +40,13 @@ def extract_markdown_images(text):
     Each tuple should contain the alt text and the URL of any markdown images.
     
     """
-    matches = re.findall(r"!\[(.*?)\]\((.*?)\)", text)
+    matches = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return matches
 
 
 def extract_markdown_links(text):
     """Extracts markdown links.
     It should return tuples of anchor text and URLs."""
-    matches = re.findall(r"\[(.*?)\]\((.*?)\)", text)
+    matches = re.findall(r"\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return matches
 
