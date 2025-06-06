@@ -96,19 +96,29 @@ class TestMarkdownToTextNode(unittest.TestCase):
 
 
 class TestExtractMarkdownLinksAndImages(unittest.TestCase):
-    def test_extract_markdown_images(self):
+    def test_extract_images(self):
         matches = extract_markdown_images(
             "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)")
         self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")],
                               matches)
+        
+    def test_images_extra_characters_excluded(self):
+        matches = extract_markdown_images(
+            "This is a text with an ![[image] (https://i.imgur.com/zjjcJKZ.png)")
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
 
-    def test_extract_markdown_links(self):
+    def test_extract_links(self):
         matches = extract_markdown_links(
             "This is text with a link [to boot dev](https://www.boot.dev) "
             "and [to youtube](https://www.youtube.com/@bootdotdev)")
         self.assertListEqual([("to boot dev", "https://www.boot.dev"), 
                               ("to youtube", "https://www.youtube.com/@bootdotdev")],
                                 matches)
+
+    def test_links_extra_characters_excluded(self):
+        matches = extract_markdown_links(
+            "This is a text with a link [[to boot dev](https://www.boot.dev)")
+        self.assertListEqual([("to boot dev", "https://www.boot.dev")], matches)
 
 
 if __name__ == "__main__":
