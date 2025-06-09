@@ -143,6 +143,25 @@ class TestExtractMarkdownLinksAndImages(unittest.TestCase):
         self.assertListEqual([("to boot dev", "https://www.boot.dev")], matches)
 
 
+    def test_split_links(self):
+        node = TextNode(
+            "This is text with a link [to boot dev](https://www.boot.dev) "
+            "and [to youtube](https://www.youtube.com/@bootdotdev)", 
+            TextType.TEXT
+        )
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual(
+            [
+                TextNode("This is text with a link ", TextType.TEXT),
+                TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
+                TextNode(" and ", TextType.TEXT),
+                TextNode("to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev"
+                         )
+            ],
+            new_nodes
+        )
+
+
     def test_split_images(self):
         node = TextNode(
         "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) "
@@ -163,23 +182,56 @@ class TestExtractMarkdownLinksAndImages(unittest.TestCase):
         )
 
 
-    def test_split_links(self):
-        node = TextNode(
-            "This is text with a link [to boot dev](https://www.boot.dev) "
-            "and [to youtube](https://www.youtube.com/@bootdotdev)", 
-            TextType.TEXT
-        )
-        new_nodes = split_nodes_link([node])
+    def test_split_images_multiple_nodes(self):
+        node = [
+            TextNode(
+                "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) "
+                "and another ![second image](https://i.imgur.com/3elNhQu.png)",
+                TextType.TEXT), 
+            TextNode(
+                "This is a second textnode with an ![image](https://www.example.com)", 
+                TextType.TEXT)
+        ]
+        new_nodes = split_nodes_image(node)
+        self.assertListEqual(
+            [
+                TextNode("This is text with an ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode("second image", TextType.IMAGE, 
+                         "https://i.imgur.com/3elNhQu.png"),
+                TextNode("This is a second textnode with an ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "https://www.example.com")
+
+            ],
+            new_nodes
+        )       
+
+    def test_split_links_multiple_nodes(self):
+        node = [
+            TextNode(
+                "This is text with a link [to boot dev](https://www.bootdev.com) "
+                "and another link [to youtube](https://www.youtube.com)",
+                TextType.TEXT), 
+            TextNode(
+                "This is a second textnode with a link [Example](https://www.example.com)", 
+                TextType.TEXT)
+        ]
+        new_nodes = split_nodes_link(node)
         self.assertListEqual(
             [
                 TextNode("This is text with a link ", TextType.TEXT),
-                TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
-                TextNode(" and ", TextType.TEXT),
-                TextNode("to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev"
-                         )
+                TextNode("to boot dev", TextType.LINK, "https://www.bootdev.com"),
+                TextNode(" and another link ", TextType.TEXT),
+                TextNode("to youtube", TextType.LINK, 
+                         "https://www.youtube.com"),
+                TextNode("This is a second textnode with a link ", TextType.TEXT),
+                TextNode("Example", TextType.LINK, "https://www.example.com")
+
             ],
             new_nodes
-        )
+        )       
+
 
 
 if __name__ == "__main__":
