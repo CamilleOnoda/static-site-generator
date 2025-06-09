@@ -1,3 +1,5 @@
+from tracemalloc import start
+from numpy import extract
 from textnode import TextNode, TextType
 import re
 
@@ -46,9 +48,57 @@ def extract_markdown_images(text):
 
 
 def extract_markdown_links(text):
-    """Extracts markdown links.
-    It should return tuples of anchor text and URLs."""
-    pattern = r"\[.*?([^\[\]]*)\].*?\(([^\(\)]*)\)"
+    """Extracts markdown links. Return tuples of anchor text and URLs."""
+    pattern = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
     matches = re.findall(pattern, text)
     return matches
 
+
+def split_nodes_link(old_nodes):
+    """Split raw markdown text into TextNodes based on links"""
+    final_nodes = []
+    for old_node in old_nodes:
+        if old_node.text == "":
+            continue
+        new_nodes = []
+        extracted_links = extract_markdown_links(old_node.text)
+        if not extracted_links:
+            new_nodes.append(old_node)
+
+        current_text = old_node.text
+        for link in extracted_links:
+            sections = current_text.split(f"[{link[0]}]({link[1]})")
+            before_link = TextNode(sections[0], TextType.TEXT)
+            new_link = TextNode(link[0], TextType.LINK, link[1])
+            new_nodes.append(before_link)
+            new_nodes.append(new_link)
+            current_text = sections[1]
+
+    final_nodes.extend(new_nodes)
+
+    return final_nodes
+
+
+def split_nodes_image(old_nodes):
+    """Split raw markdown text into TextNodes based on images"""
+    final_nodes = []
+    for old_node in old_nodes:
+        if old_node.text == "":
+            continue
+        new_nodes = []
+        extracted_links = extract_markdown_images(old_node.text)
+        if not extracted_links:
+            new_nodes.append(old_node)
+
+        current_text = old_node.text
+        for link in extracted_links:
+            sections = current_text.split(f"![{link[0]}]({link[1]})")
+            before_link = TextNode(sections[0], TextType.TEXT)
+            new_link = TextNode(link[0], TextType.IMAGE, link[1])
+            new_nodes.append(before_link)
+            new_nodes.append(new_link)
+            current_text = sections[1]
+
+    final_nodes.extend(new_nodes)
+
+    return final_nodes
