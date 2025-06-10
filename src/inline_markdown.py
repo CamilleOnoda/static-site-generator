@@ -48,7 +48,8 @@ def extract_markdown_images(text):
 
 
 def extract_markdown_links(text):
-    """Extracts markdown links. Return tuples of anchor text and URLs."""
+    """Extracts markdown images. 
+    Return a list of tuples of anchor text and URLs."""
     pattern = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
     matches = re.findall(pattern, text)
     return matches
@@ -58,14 +59,17 @@ def split_nodes_link(old_nodes):
     """Split raw markdown text into TextNodes based on links"""
     final_nodes = []
     for old_node in old_nodes:
-        new_nodes = []
-        extracted_images = extract_markdown_links(old_node.text)
-        if not extracted_images:
+        if old_node.text_type != TextType.TEXT:
             final_nodes.append(old_node)
-            break
+            continue
+        new_nodes = []
+        extracted_links = extract_markdown_links(old_node.text)
+        if not extracted_links:
+            final_nodes.append(old_node)
+            continue
 
         current_text = old_node.text
-        for link in extracted_images:
+        for link in extracted_links:
             sections = current_text.split(f"[{link[0]}]({link[1]})")
             before_link = TextNode(sections[0], TextType.TEXT)
             new_link = TextNode(link[0], TextType.LINK, link[1])
@@ -87,20 +91,23 @@ def split_nodes_image(old_nodes):
     """Split raw markdown text into TextNodes based on images"""
     final_nodes = []
     for old_node in old_nodes:
+        if old_node.text_type != TextType.TEXT:
+            final_nodes.append(old_node)
+            continue
         new_nodes = []
         extracted_images = extract_markdown_images(old_node.text)
         if not extracted_images:
             final_nodes.append(old_node)
-            break
+            continue
 
         current_text = old_node.text
-        for link in extracted_images:
-            sections = current_text.split(f"![{link[0]}]({link[1]})")
-            before_link = TextNode(sections[0], TextType.TEXT)
-            new_link = TextNode(link[0], TextType.IMAGE, link[1])
-            if before_link.text != "":
-                new_nodes.append(before_link)
-            new_nodes.append(new_link)
+        for image in extracted_images:
+            sections = current_text.split(f"![{image[0]}]({image[1]})")
+            before_image = TextNode(sections[0], TextType.TEXT)
+            new_image = TextNode(image[0], TextType.IMAGE, image[1])
+            if before_image.text != "":
+                new_nodes.append(before_image)
+            new_nodes.append(new_image)
             current_text = sections[1]
 
         if current_text != "":
@@ -110,3 +117,27 @@ def split_nodes_image(old_nodes):
         final_nodes.extend(new_nodes)
 
     return final_nodes
+
+
+def text_to_textnodes(text):
+    """Convert a raw string of markdown-flavored text 
+    into a list of TextNode objects."""
+    # Split by bold text
+    text = split_nodes_delimiter(text, "**", TextType.BOLD)
+    text = split_nodes_delimiter(text, "__", TextType.BOLD)
+
+    # Split by italic text
+    text = split_nodes_delimiter(text, "_", TextType.ITALIC)
+    text = split_nodes_delimiter(text, "*", TextType.ITALIC)
+
+    # Split by code block
+    text = split_nodes_delimiter(text, "`", TextType.CODE)
+
+    # Split by image
+    text = split_nodes_image(text)
+
+    # Split by link
+    text = split_nodes_link(text)
+
+
+    return text
