@@ -305,5 +305,16 @@ class TestExtractMarkdownLinksAndImages(unittest.TestCase):
         )
 
 
+    def test_split_nodes_link_NoImage(self):
+        node = TextNode("This is a text without an image", TextType.TEXT)
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("This is a text without an image", TextType.TEXT)
+            ],
+            new_nodes
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
