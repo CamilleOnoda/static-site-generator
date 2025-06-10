@@ -58,19 +58,19 @@ def split_nodes_link(old_nodes):
     """Split raw markdown text into TextNodes based on links"""
     final_nodes = []
     for old_node in old_nodes:
-        if old_node.text == "":
-            continue
         new_nodes = []
-        extracted_links = extract_markdown_links(old_node.text)
-        if not extracted_links:
-            new_nodes.append(old_node)
+        extracted_images = extract_markdown_links(old_node.text)
+        if not extracted_images:
+            final_nodes.append(old_node)
+            break
 
         current_text = old_node.text
-        for link in extracted_links:
+        for link in extracted_images:
             sections = current_text.split(f"[{link[0]}]({link[1]})")
             before_link = TextNode(sections[0], TextType.TEXT)
             new_link = TextNode(link[0], TextType.LINK, link[1])
-            new_nodes.append(before_link)
+            if before_link.text != "":
+                new_nodes.append(before_link)
             new_nodes.append(new_link)
             current_text = sections[1]
 
@@ -88,12 +88,13 @@ def split_nodes_image(old_nodes):
     final_nodes = []
     for old_node in old_nodes:
         new_nodes = []
-        extracted_links = extract_markdown_images(old_node.text)
-        if not extracted_links:
-            new_nodes.append(old_node)
+        extracted_images = extract_markdown_images(old_node.text)
+        if not extracted_images:
+            final_nodes.append(old_node)
+            break
 
         current_text = old_node.text
-        for link in extracted_links:
+        for link in extracted_images:
             sections = current_text.split(f"![{link[0]}]({link[1]})")
             before_link = TextNode(sections[0], TextType.TEXT)
             new_link = TextNode(link[0], TextType.IMAGE, link[1])
