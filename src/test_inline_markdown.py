@@ -1,4 +1,5 @@
 import unittest
+from test_textnode import TestTextNode
 from textnode import TextNode, TextType
 from inline_markdown import (split_nodes_delimiter, 
                             extract_markdown_images,
@@ -311,6 +312,28 @@ class TestExtractMarkdownLinksAndImages(unittest.TestCase):
         self.assertListEqual(
             [
                 TextNode("This is a text without an image", TextType.TEXT)
+            ],
+            new_nodes
+        )
+
+
+    def test_split_nodes_image_single(self):
+        node = TextNode("![image](https://i.imgur.com/zjjcJKZ.png)", TextType.TEXT)
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png")
+            ],
+            new_nodes
+        )
+
+
+    def test_split_nodes_link_single(self):
+        node = TextNode("[to boot dev](https://www.bootdev.com)", TextType.TEXT)
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual(
+            [
+                TextNode("to boot dev", TextType.LINK, "https://www.bootdev.com")
             ],
             new_nodes
         )
