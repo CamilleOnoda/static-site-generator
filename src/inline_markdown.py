@@ -1,5 +1,3 @@
-from tracemalloc import start
-from numpy import extract
 from textnode import TextNode, TextType
 import re
 
@@ -161,3 +159,13 @@ def text_to_textnodes(text):
 
 
     return text
+
+
+def markdown_to_blocks(markdown):
+    """Takes a raw Markdown string (representing a full document) as input
+     
+       and returns a list of "block" strings."""
+    split_markdown = markdown.split("\n\n")
+    strip_blocks = [block.strip() for block in split_markdown if block != ""]
+    return strip_blocks
+
