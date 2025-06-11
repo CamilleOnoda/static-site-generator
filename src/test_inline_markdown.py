@@ -116,7 +116,7 @@ class TestMarkdownToTextNode(unittest.TestCase):
         with self.assertRaises(ValueError):
             node = TextNode("This is a text with a `missing delimiter",
                             TextType.TEXT)
-            new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+            split_nodes_delimiter([node], "`", TextType.CODE)
 
 
     def test_text_to_textnodes(self):
@@ -349,7 +349,16 @@ class TestExtractMarkdownLinksAndImages(unittest.TestCase):
                 "This is text with a [link to boot dev]https://www.boot.dev)", 
                 TextType.TEXT
             )
-            new_nodes = split_nodes_link([node])
+            split_nodes_link([node])
+
+
+    def test_split_nodes_image_invalidMarkdown(self):
+        with self.assertRaises(ValueError):
+            node = TextNode(
+                "This is text with an ![image(https://i.imgur.com/zjjcJKZ.png)", 
+                TextType.TEXT
+            )
+            split_nodes_image([node])
 
 
 if __name__ == "__main__":
