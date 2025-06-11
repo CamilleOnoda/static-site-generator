@@ -45,12 +45,12 @@ def extract_markdown_images(text):
 
     # Check for invalid markdown syntax
     # Case with "](" without opening "["
-#    if "](" in text and not re.search(r"!\[.*?\]\(", text):
-#        raise ValueError("Invalid Markdown image syntax")
+    if "](" in text and not re.search(r"!\[.*?\]\(", text):
+        raise ValueError("Invalid Markdown image syntax")
     
     # Case with opening "[" without "]("
-#    if "![" in text and not re.search(r"!\[.*?\]\(.*?\)", text):
-#        raise ValueError("Invalid Markdown image syntax")
+    if "![" in text and not re.search(r"!\[.*?\]\s*\(.*?\)", text):
+        raise ValueError("Invalid Markdown image syntax")
     
     pattern = r"!\[.*?([^\[\]]*)\].*?\(([^\(\)]*)\)"
     matches = re.findall(pattern, text)
@@ -67,7 +67,7 @@ def extract_markdown_links(text):
         raise ValueError("Invalid Markdown link syntax")
     
     # Case with opening "[" without "]("
-    if "[" in text and not re.search(r"\[.*?\]\(.*?\)", text):
+    if "[" in text and not re.search(r"\[.*?\]\s*\(.*?\)", text):
         raise ValueError("Invalid Markdown link syntax") 
 
     pattern = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
@@ -122,9 +122,7 @@ def split_nodes_image(old_nodes):
 
         current_text = old_node.text
         for image in extracted_images:
-            sections = current_text.split(f"![{image[0]}]({image[1]})",1)
-            if len(sections) != 2:
-                raise ValueError("invalid markdown, image section not closed")
+            sections = current_text.split(f"![{image[0]}]({image[1]})")
             before_image = TextNode(sections[0], TextType.TEXT)
             new_image = TextNode(image[0], TextType.IMAGE, image[1])
             if before_image.text != "":
