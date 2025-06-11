@@ -1,3 +1,4 @@
+from multiprocessing import Value
 from textnode import TextNode, TextType
 import re
 
@@ -166,6 +167,9 @@ def markdown_to_blocks(markdown):
      
        and returns a list of "block" strings."""
     split_markdown = markdown.split("\n\n")
+    for block in split_markdown:
+        if "\t" in block:
+            raise ValueError("Newlines shouldn't be indented")
     if len(split_markdown) == 1:
         raise ValueError(
             "Invalid Markdown input. Each section is separated by a double newline"
