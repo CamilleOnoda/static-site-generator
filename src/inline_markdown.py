@@ -166,6 +166,10 @@ def markdown_to_blocks(markdown):
      
        and returns a list of "block" strings."""
     split_markdown = markdown.split("\n\n")
+    if len(split_markdown) == 1:
+        raise ValueError(
+            "Invalid Markdown input. Each section is separated by a double newline"
+            )
     strip_blocks = [block.strip() for block in split_markdown if block != ""]
     return strip_blocks
-
+    
