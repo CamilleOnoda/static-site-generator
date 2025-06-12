@@ -192,4 +192,17 @@ def block_to_block_type(block):
     """Takes a single block of markdown text as input 
     
     and returns the BlockType representing the type of block it is."""
-    pass
+
+    if re.findall(r"^#{1,6} \S.+", block, re.MULTILINE):
+        return BlockType.HEADING
+    elif re.findall(r"^```.*?```$", block, re.DOTALL):
+        return BlockType.CODE
+    elif re.findall(r"^> ?.*", block, re.MULTILINE):
+        return BlockType.QUOTE
+    elif re.findall(r"^- .+", block, re.MULTILINE):
+        return BlockType.UNORDERED_LIST
+    elif re.findall(r"^[0-9]+\. .+", block, re.MULTILINE):
+        return BlockType.ORDERED_LIST
+    else:
+        return BlockType.PARAGRAPH
+
