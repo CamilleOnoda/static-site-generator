@@ -1,6 +1,15 @@
-from multiprocessing import Value
+from enum import Enum
 from textnode import TextNode, TextType
 import re
+
+
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered_list"
+    ORDERED_LIST = "ordered_list"
 
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
@@ -166,14 +175,21 @@ def markdown_to_blocks(markdown):
     """Takes a raw Markdown string (representing a full document) as input
      
        and returns a list of "block" strings."""
+    
     split_markdown = markdown.split("\n\n")
     for block in split_markdown:
         if "\t" in block:
-            raise ValueError("Newlines shouldn't be indented")
+            raise ValueError("Newlines can't be indented")
     if len(split_markdown) == 1:
         raise ValueError(
             "Invalid Markdown input. Each section is separated by a double newline"
             )
-    strip_blocks = [block.strip() for block in split_markdown if block != ""]
-    return strip_blocks
+    blocks = [block.strip() for block in split_markdown if block != ""]
+    return blocks
     
+
+def block_to_block_type(block):
+    """Takes a single block of markdown text as input 
+    
+    and returns the BlockType representing the type of block it is."""
+    pass
