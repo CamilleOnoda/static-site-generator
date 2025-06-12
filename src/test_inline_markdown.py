@@ -1,12 +1,13 @@
 import unittest
 from textnode import TextNode, TextType
-from inline_markdown import (split_nodes_delimiter, 
+from inline_markdown import (BlockType, split_nodes_delimiter, 
                             extract_markdown_images,
                             extract_markdown_links,
                             split_nodes_link,
                             split_nodes_image,
                             text_to_textnodes,
-                            markdown_to_blocks)
+                            markdown_to_blocks,
+                            block_to_block_type)
 
 
 class TestMarkdownToTextNode(unittest.TestCase):
@@ -407,6 +408,35 @@ This is the same paragraph on a new line
 """
             markdown_to_blocks(md)
 
+
+    def test_block_to_block_type_Paragraph(self):
+        block = "This is **bolded** paragraph."
+        block_type = block_to_block_type(block)
+        self.assertEqual(block_type, BlockType.PARAGRAPH)
+
+
+    def test_block_to_block_type_Heading(self):
+        block = "## I am a title"
+        block_type = block_to_block_type(block)
+        self.assertEqual(block_type, BlockType.HEADING)
+
+
+    def test_block_to_block_type_Code(self):
+        block = "```I am a code block\n and another code block```"
+        block_type = block_to_block_type(block)
+        self.assertEqual(block_type, BlockType.CODE)
+
+
+    def test_block_to_block_type_UnorderedList(self):
+        block = "- First item\n - Second item\n - Third item"
+        block_type = block_to_block_type(block)
+        self.assertEqual(block_type, BlockType.UNORDERED_LIST)
+
+
+    def test_block_to_block_type_OrderedList(self):
+        block = "1. First item\n 2. Second item\n 3. Third item"
+        block_type = block_to_block_type(block)
+        self.assertEqual(block_type, BlockType.ORDERED_LIST)
 
 
 if __name__ == "__main__":
