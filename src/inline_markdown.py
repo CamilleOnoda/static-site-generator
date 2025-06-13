@@ -1,4 +1,5 @@
 from enum import Enum
+from htmlnode import HTMLNode
 from textnode import TextNode, TextType
 import re
 
@@ -206,3 +207,52 @@ def block_to_block_type(block):
     else:
         return BlockType.PARAGRAPH
 
+
+def get_heading_count(block):
+    if block.count("#") == 1:
+        return HTMLNode("H1",block)
+    if block.count("#") == 2:
+        return HTMLNode("H2",block)
+    if block.count("#") == 3:
+        return HTMLNode("H3",block)
+    if block.count("#") == 4:
+        return HTMLNode("H4",block)
+    if block.count("#") == 5:
+        return HTMLNode("H5",block)
+    if block.count("#") == 6:
+        return HTMLNode("H6",block)
+
+
+def blockType_to_HTMLNode(blockType, block):
+    if blockType == BlockType.PARAGRAPH:
+        return HTMLNode("p", block)
+    elif blockType == BlockType.HEADING:
+        return get_heading_count(block)
+    elif blockType == BlockType.CODE:
+        return HTMLNode("code", block)
+    elif blockType == BlockType.QUOTE:
+        return HTMLNode("blockquote", block)
+    elif blockType == BlockType.UNORDERED_LIST:
+        return HTMLNode("ul", block)
+    elif blockType == BlockType.ORDERED_LIST:
+        return HTMLNode("ol", block)
+
+
+def block_to_html(markdown):
+    blocks_markdown = markdown_to_blocks(markdown)
+    for block in blocks_markdown:
+        block_type = block_to_block_type(block)
+        html_node = blockType_to_HTMLNode(block_type, block)
+
+    return html_node
+
+
+md = """
+###### This is an H6 title
+
+1. This is a list
+2. with items
+
+I am a paragraph
+"""
+print(block_to_html(md))
