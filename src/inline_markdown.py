@@ -13,6 +13,26 @@ class BlockType(Enum):
     ORDERED_LIST = "ordered_list"
 
 
+def text_to_textnodes(text):
+    """Convert a raw string of markdown-flavored text 
+    into a list of TextNode objects."""
+    
+    initial_TextNode = TextNode(text, TextType.TEXT)
+    new_TextNode = split_nodes_delimiter([initial_TextNode], "**", TextType.BOLD)
+    new_TextNode = split_nodes_delimiter(new_TextNode, "__", TextType.BOLD)
+
+    new_TextNode = split_nodes_delimiter(new_TextNode, "_", TextType.ITALIC)
+    new_TextNode = split_nodes_delimiter(new_TextNode, "*", TextType.ITALIC)
+
+    new_TextNode = split_nodes_delimiter(new_TextNode, "`", TextType.CODE)
+
+    new_TextNode = split_nodes_image(new_TextNode)
+
+    new_TextNode = split_nodes_link(new_TextNode)
+
+    return new_TextNode
+
+
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     """
     It takes a list of "old nodes", a delimiter, and a text type. 
@@ -148,30 +168,6 @@ def split_nodes_image(old_nodes):
     return final_nodes
 
 
-def text_to_textnodes(text):
-    """Convert a raw string of markdown-flavored text 
-    into a list of TextNode objects."""
-    # Split by bold text
-    text = split_nodes_delimiter(text, "**", TextType.BOLD)
-    text = split_nodes_delimiter(text, "__", TextType.BOLD)
-
-    # Split by italic text
-    text = split_nodes_delimiter(text, "_", TextType.ITALIC)
-    text = split_nodes_delimiter(text, "*", TextType.ITALIC)
-
-    # Split by code block
-    text = split_nodes_delimiter(text, "`", TextType.CODE)
-
-    # Split by image
-    text = split_nodes_image(text)
-
-    # Split by link
-    text = split_nodes_link(text)
-
-
-    return text
-
-
 def markdown_to_blocks(markdown):
     """Takes a raw Markdown string (representing a full document) as input
      
@@ -223,36 +219,41 @@ def get_heading_count(block):
         return HTMLNode("H6",block)
 
 
-def blockType_to_HTMLNode(blockType, block):
+def block_to_HTMLNode(blockType, block):
     if blockType == BlockType.PARAGRAPH:
         return HTMLNode("p", block)
     elif blockType == BlockType.HEADING:
         return get_heading_count(block)
     elif blockType == BlockType.CODE:
-        return HTMLNode("code", block)
+        return HTMLNode("pre", block)
     elif blockType == BlockType.QUOTE:
         return HTMLNode("blockquote", block)
     elif blockType == BlockType.UNORDERED_LIST:
-        return HTMLNode("ul", block)
+        return HTMLNode("ul", None, block)
     elif blockType == BlockType.ORDERED_LIST:
-        return HTMLNode("ol", block)
+        return HTMLNode("ol", None, block)
 
 
-def block_to_html(markdown):
+def text_to_children(text):
+    # Break down the text into a list of TextNodes based on inline markdown.
+    new_text_nodes = text_to_textnodes(text)
+    for node in new_text_nodes:
+        pass
+    return new_text_nodes
+
+
+def markdown_to_html_node(markdown):
     blocks_markdown = markdown_to_blocks(markdown)
     for block in blocks_markdown:
         block_type = block_to_block_type(block)
-        html_node = blockType_to_HTMLNode(block_type, block)
-
-    return html_node
+        block_node = block_to_HTMLNode(block_type, block)
+        block_to_TextNode = text_to_children(block_node.value)
+    
 
 
 md = """
-###### This is an H6 title
+This is **bold** and _italic_
 
-1. This is a list
-2. with items
-
-I am a paragraph
+## This is a title
 """
-print(block_to_html(md))
+print(markdown_to_html_node(md))
