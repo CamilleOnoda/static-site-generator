@@ -416,7 +416,7 @@ This is the same paragraph on a new line
         self.assertEqual(block_type, BlockType.ORDERED_LIST)
 
 
-    def test_paragraphs(self):
+    def test_markdown_to_html_paragraphs(self):
         md = """
 This is **bolded** paragraph
 text in a p
@@ -434,7 +434,7 @@ This is another paragraph with _italic_ text and `code` here
         )
 
 
-    def test_codeblock(self):
+    def test_markdown_to_html_codeblock(self):
         md = """
 ```
 This is text that _should_ remain
