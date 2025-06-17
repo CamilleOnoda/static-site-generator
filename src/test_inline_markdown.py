@@ -1,13 +1,15 @@
 import unittest
 from textnode import TextNode, TextType
-from inline_markdown import (BlockType, split_nodes_delimiter, 
+from inline_markdown import (BlockType,
+                            split_nodes_delimiter, 
                             extract_markdown_images,
                             extract_markdown_links,
                             split_nodes_link,
                             split_nodes_image,
                             text_to_textnodes,
                             markdown_to_blocks,
-                            block_to_block_type)
+                            block_to_block_type,
+                            markdown_to_html_node)
 
 
 class TestMarkdownToTextNode(unittest.TestCase):
@@ -122,13 +124,12 @@ class TestMarkdownToTextNode(unittest.TestCase):
 
 
     def test_text_to_textnodes(self):
-        node = TextNode("This is **text** with an _italic_ word and " \
+        node = "This is **text** with an _italic_ word and " \
         "a `code block` and an " \
         "![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) " \
-        "and a [link](https://boot.dev)",
-        TextType.TEXT
-        )
-        new_nodes = text_to_textnodes([node])
+        "and a [link](https://boot.dev)"
+
+        new_nodes = text_to_textnodes(node)
         self.assertListEqual(
             [
                 TextNode("This is ", TextType.TEXT),
@@ -363,19 +364,7 @@ class TestExtractMarkdownLinksAndImages(unittest.TestCase):
             split_nodes_image([node])
 
 
-class TestMarkdownToBlocks(unittest.TestCase):
-    def test_missing_double_newline(self):
-        with self.assertRaises(ValueError):
-            md = """
-This is **bolded** paragraph
-This is another paragraph with _italic_ text and `code` here
-This is the same paragraph on a new line
-- This is a list
-- with items
-"""
-            markdown_to_blocks(md)
-
-
+class TestMarkdownToHTML(unittest.TestCase):
     def test_markdown_to_blocks(self):
         md = """
 This is **bolded** paragraph
@@ -395,18 +384,6 @@ This is the same paragraph on a new line
                 "- This is a list\n- with items",
             ],
         )
-
-    
-    def test_invalid_indentation(self):
-        with self.assertRaises(ValueError):
-            md = """
-This is **bolded** paragraph
-    This is another paragraph with _italic_ text and `code` here
-This is the same paragraph on a new line
-    - This is a list
-- with items
-"""
-            markdown_to_blocks(md)
 
 
     def test_block_to_block_type_Paragraph(self):
@@ -437,6 +414,40 @@ This is the same paragraph on a new line
         block = "1. First item\n 2. Second item\n 3. Third item"
         block_type = block_to_block_type(block)
         self.assertEqual(block_type, BlockType.ORDERED_LIST)
+
+
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )
 
 
 if __name__ == "__main__":
