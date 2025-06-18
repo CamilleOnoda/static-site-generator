@@ -1,6 +1,6 @@
 from enum import Enum
-from htmlnode import HTMLNode
-from textnode import TextNode, TextType
+from htmlnode import HTMLNode, ParentNode, LeafNode
+from textnode import TextNode, TextType, text_node_to_html_node
 import re
 
 
@@ -14,8 +14,10 @@ class BlockType(Enum):
 
 
 def text_to_textnodes(text):
-    """Convert a raw string of markdown-flavored text 
-    into a list of TextNode objects."""
+    """
+    Converts a raw string of markdown-flavored text 
+    into a list of TextNode objects.
+    """
     
     initial_TextNode = TextNode(text, TextType.TEXT)
     new_TextNode = split_nodes_delimiter([initial_TextNode], "**", TextType.BOLD)
@@ -66,7 +68,8 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
 
 def extract_markdown_images(text):
-    """Takes raw markdown text and returns a list of tuples. 
+    """
+    Takes raw markdown text and returns a list of tuples. 
     
     Each tuple should contain the alt text and the URL of any markdown images.
     
@@ -87,8 +90,10 @@ def extract_markdown_images(text):
 
 
 def extract_markdown_links(text):
-    """Extracts markdown images. 
-    Return a list of tuples of anchor text and URLs."""
+    """
+    Extracts markdown images. 
+    Return a list of tuples of anchor text and URLs.
+    """
 
     # Check for invalid markdown syntax
     # Case with "](" without opening "["
@@ -105,7 +110,9 @@ def extract_markdown_links(text):
 
 
 def split_nodes_link(old_nodes):
-    """Split raw markdown text into TextNodes based on links"""
+    """
+    Split raw markdown text into TextNodes based on links
+    """
     final_nodes = []
     for old_node in old_nodes:
         if old_node.text_type != TextType.TEXT:
@@ -137,7 +144,9 @@ def split_nodes_link(old_nodes):
 
 
 def split_nodes_image(old_nodes):
-    """Split raw markdown text into TextNodes based on images"""
+    """
+    Split raw markdown text into TextNodes based on images
+    """
     final_nodes = []
     for old_node in old_nodes:
         if old_node.text_type != TextType.TEXT:
@@ -169,26 +178,23 @@ def split_nodes_image(old_nodes):
 
 
 def markdown_to_blocks(markdown):
-    """Takes a raw Markdown string (representing a full document) as input
+    """
+    Takes a raw Markdown string (representing a full document) as input
      
-       and returns a list of "block" strings."""
+    and returns a list of "block" strings.
+    """
     
     split_markdown = markdown.split("\n\n")
-    for block in split_markdown:
-        if "\t" in block:
-            raise ValueError("Newlines can't be indented")
-    if len(split_markdown) == 1:
-        raise ValueError(
-            "Invalid Markdown input. Each section is separated by a double newline"
-            )
     blocks = [block.strip() for block in split_markdown if block != ""]
     return blocks
     
 
 def block_to_block_type(block):
-    """Takes a single block of markdown text as input 
+    """
+    Takes a single block of markdown text as input 
     
-    and returns the BlockType representing the type of block it is."""
+    and returns the BlockType representing the type of block it is.
+    """
 
     if re.findall(r"^#{1,6} \S.+", block, re.MULTILINE):
         return BlockType.HEADING
@@ -204,56 +210,114 @@ def block_to_block_type(block):
         return BlockType.PARAGRAPH
 
 
-def get_heading_count(block):
+def get_heading_html(block):
     if block.count("#") == 1:
-        return HTMLNode("H1",block)
-    if block.count("#") == 2:
-        return HTMLNode("H2",block)
-    if block.count("#") == 3:
-        return HTMLNode("H3",block)
-    if block.count("#") == 4:
-        return HTMLNode("H4",block)
-    if block.count("#") == 5:
-        return HTMLNode("H5",block)
-    if block.count("#") == 6:
-        return HTMLNode("H6",block)
-
-
-def block_to_HTMLNode(blockType, block):
-    if blockType == BlockType.PARAGRAPH:
-        return HTMLNode("p", block)
-    elif blockType == BlockType.HEADING:
-        return get_heading_count(block)
-    elif blockType == BlockType.CODE:
-        return HTMLNode("pre", block)
-    elif blockType == BlockType.QUOTE:
-        return HTMLNode("blockquote", block)
-    elif blockType == BlockType.UNORDERED_LIST:
-        return HTMLNode("ul", None, block)
-    elif blockType == BlockType.ORDERED_LIST:
-        return HTMLNode("ol", None, block)
+        return "h1"
+    elif block.count("#") == 2:
+        return "h2"
+    elif block.count("#") == 3:
+        return "h3"
+    elif block.count("#") == 4:
+        return "h4"
+    elif block.count("#") == 5:
+        return "h5"
+    elif block.count("#") == 6:
+        return "h6"
 
 
 def text_to_children(text):
-    # Break down the text into a list of TextNodes based on inline markdown.
+    """
+    Creates a list of children based on the inline markdown syntax
+    """
     new_text_nodes = text_to_textnodes(text)
+    list_children = []
     for node in new_text_nodes:
-        pass
-    return new_text_nodes
+        new_child = text_node_to_html_node(node)
+        list_children.append(new_child)
+    return list_children
 
 
+def get_content(blockType, block):
+    """
+    Extracts the content of a block based on the block type
+    """
+    if blockType == BlockType.PARAGRAPH:
+        return block.replace("\n", " ")
+    elif blockType == BlockType.HEADING:
+        return re.findall(r"^#{1,6} +(.+)", block)
+    elif blockType == BlockType.CODE:
+        content = re.findall(r"^```(.*?)```$", block, re.DOTALL)
+        raw_content = content[0]
+        return raw_content.lstrip()
+    elif blockType == BlockType.QUOTE:
+        return re.findall(r"^> (.*)", block, re.MULTILINE)
+    elif blockType == BlockType.UNORDERED_LIST:
+        return re.findall(r"^- (.*)", block, re.MULTILINE)
+    elif blockType == BlockType.ORDERED_LIST:
+        return re.findall(r"^[0-9]+\. (.+)", block, re.MULTILINE)
+
+
+def block_to_ParentNode(blockType, block):
+    """
+    Takes a block of markdown and its block type, 
+    extracts the content and creates a section level ParentNode
+    """
+    if blockType == BlockType.PARAGRAPH:
+        text = get_content(blockType, block)
+        children = text_to_children(text)
+        return ParentNode("p", children)
+    
+    elif blockType == BlockType.HEADING:
+        heading_text = get_content(blockType, block)
+        tag = get_heading_html(block)
+        children = text_to_children(heading_text[0])
+        return ParentNode(tag, children)
+    
+    elif blockType == BlockType.CODE:
+        children_list = []
+        cleaned_text = get_content(blockType, block)
+        node = TextNode(cleaned_text, TextType.CODE)
+        children = text_node_to_html_node(node)
+        children_list.append(children)
+        return ParentNode("pre", children_list)
+    
+    elif blockType == BlockType.QUOTE:
+        content = get_content(blockType, block)
+        children_list = []
+        for element in content:
+            result = text_to_children(element)
+            for content in result:
+                children_list.append(content)
+        return ParentNode("blockquote", children_list)
+    
+    elif blockType == BlockType.UNORDERED_LIST:
+        content = get_content(blockType, block)
+        children_list = []
+        for item in content:
+            child = text_to_children(item)
+            nested_parent = ParentNode("li", child)
+            children_list.append(nested_parent)
+        return ParentNode("ul", children_list)
+    
+    elif blockType == BlockType.ORDERED_LIST:
+        content = get_content(blockType, block)
+        children_list = []
+        for item in content:
+            child = text_to_children(item)
+            nested_parent = ParentNode("li", child)
+            children_list.append(nested_parent)
+        return ParentNode("ol", children_list)
+
+        
 def markdown_to_html_node(markdown):
+    """ 
+    Converts a full markdown document into a single parent HTMLNode
+    """
     blocks_markdown = markdown_to_blocks(markdown)
+    children_list = []
     for block in blocks_markdown:
         block_type = block_to_block_type(block)
-        block_node = block_to_HTMLNode(block_type, block)
-        block_to_TextNode = text_to_children(block_node.value)
-    
+        parent = block_to_ParentNode(block_type, block)
+        children_list.append(parent)
+    return ParentNode("div", children_list)
 
-
-md = """
-This is **bold** and _italic_
-
-## This is a title
-"""
-print(markdown_to_html_node(md))
