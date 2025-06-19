@@ -416,14 +416,13 @@ This is the same paragraph on a new line
         self.assertEqual(block_type, BlockType.ORDERED_LIST)
 
 
-    def test_markdown_to_html_paragraphs(self):
+    def test_markdown_to_html_node_paragraphs(self):
         md = """
 This is **bolded** paragraph
 text in a p
 tag here
 
 This is another paragraph with _italic_ text and `code` here
-
 """
 
         node = markdown_to_html_node(md)
@@ -434,7 +433,7 @@ This is another paragraph with _italic_ text and `code` here
         )
 
 
-    def test_markdown_to_html_codeblock(self):
+    def test_markdown_to_html_node_codeblock(self):
         md = """
 ```
 This is text that _should_ remain
@@ -448,6 +447,70 @@ the **same** even with inline stuff
             html,
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
+
+
+    def test_markdown_to_html_node_orderedList(self):
+        md = """
+1. First item
+2. Second item
+3. Third item
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><ol><li>First item</li><li>Second item</li><li>Third item</li></ol></div>"
+        )
+
+
+    def test_markdown_to_html_node_unorderedList(self):
+        md = """
+- First item
+- Second item
+- Third item
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><ul><li>First item</li><li>Second item</li><li>Third item</li></ul></div>"
+        )
+
+
+    def test_markdown_to_html_node_quote(self):
+        md = """
+> Dorothy followed her through many of the beautiful rooms in her castle.
+>
+> The Witch bade her clean the pots and kettles and sweep the floor and keep the fire fed with wood.
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><blockquote>Dorothy followed her through many of the beautiful rooms in her castle. The Witch bade her clean the pots and kettles and sweep the floor and keep the fire fed with wood.</blockquote></div>"
+        )
+
+
+#    def test_markdown_to_html_node_heading(self):
+#        md = """
+# Heading level 1
+## Heading level 2
+### Heading level 3
+#"""
+#        node = markdown_to_html_node(md)
+#        html = node.to_html()
+#        self.assertEqual(
+#            html,
+#            "<div><h1>Heading level 1</h1><h2>Heading level 2</h2><h3>Heading level 3</h3></div>"
+#        )
+
+
+    def test_markdown_to_html_node_multipleBlocks(self):
+        pass
+
+
 
 
 if __name__ == "__main__":
