@@ -498,17 +498,43 @@ the **same** even with inline stuff
 # Heading level 1
 ## Heading level 2
 ### Heading level 3
+#### Heading level 4
+##### Heading level 5
+###### Heading level 6
 #"""
 #        node = markdown_to_html_node(md)
 #        html = node.to_html()
 #        self.assertEqual(
 #            html,
-#            "<div><h1>Heading level 1</h1><h2>Heading level 2</h2><h3>Heading level 3</h3></div>"
+#            "<div><h1>Heading level 1</h1><h2>Heading level 2</h2><h3>Heading level 3</h3><h4>Heading level 4</h4><h5>Heading level 5</h5><h6>Heading level 6</h6></div>"
 #        )
 
 
     def test_markdown_to_html_node_multipleBlocks(self):
-        pass
+        md = """
+I am a paragraph with an **important word** and a [link](https://www.example.com)!
+
+# I am a level 1 heading
+
+```
+Here is some code and
+a _word_ in italic
+```
+
+1. First item
+2. Second item
+3. Third item
+
+> I am a quote.
+>
+> I am another quote.
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><p>I am a paragraph with an <b>important word</b> and a <a href="https://www.example.com">link</a>!</p><h1>I am a level 1 heading</h1><pre><code>Here is some code and\na _word_ in italic\n</code></pre><ol><li>First item</li><li>Second item</li><li>Third item</li></ol><blockquote>I am a quote. I am another quote.</blockquote></div>'
+            )
 
 
 
