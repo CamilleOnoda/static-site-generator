@@ -1,5 +1,6 @@
 from enum import Enum
-from htmlnode import HTMLNode, ParentNode, LeafNode
+
+from htmlnode import ParentNode
 from textnode import TextNode, TextType, text_node_to_html_node
 import re
 
@@ -18,7 +19,6 @@ def text_to_textnodes(text):
     Converts a raw string of markdown-flavored text 
     into a list of TextNode objects.
     """
-    
     initial_TextNode = TextNode(text, TextType.TEXT)
     new_TextNode = split_nodes_delimiter([initial_TextNode], "**", TextType.BOLD)
     new_TextNode = split_nodes_delimiter(new_TextNode, "__", TextType.BOLD)
@@ -28,9 +28,12 @@ def text_to_textnodes(text):
 
     new_TextNode = split_nodes_delimiter(new_TextNode, "`", TextType.CODE)
 
-    new_TextNode = split_nodes_image(new_TextNode)
+    for node in new_TextNode:
+        if "![" in node.text:
+            new_TextNode = split_nodes_image(new_TextNode)
 
-    new_TextNode = split_nodes_link(new_TextNode)
+        else:
+            new_TextNode = split_nodes_link(new_TextNode)
 
     return new_TextNode
 
@@ -152,6 +155,8 @@ def split_nodes_image(old_nodes):
         if old_node.text_type != TextType.TEXT:
             final_nodes.append(old_node)
             continue
+#        if not re.search(r"!\[.*?\]\s*\(.*?\)", old_node.text):
+
         new_nodes = []
         extracted_images = extract_markdown_images(old_node.text)
         if not extracted_images:
@@ -210,21 +215,6 @@ def block_to_block_type(block):
         return BlockType.PARAGRAPH
 
 
-def get_heading_html(block):
-    if block.count("#") == 1:
-        return "h1"
-    elif block.count("#") == 2:
-        return "h2"
-    elif block.count("#") == 3:
-        return "h3"
-    elif block.count("#") == 4:
-        return "h4"
-    elif block.count("#") == 5:
-        return "h5"
-    elif block.count("#") == 6:
-        return "h6"
-
-
 def text_to_children(text):
     """
     Creates a list of children based on the inline markdown syntax
@@ -237,6 +227,21 @@ def text_to_children(text):
     return list_children
 
 
+def get_heading_html(heading):
+    if heading.startswith("# "):
+        return "h1"
+    elif heading.startswith("## "):
+        return "h2"
+    elif heading.startswith("### "):
+        return "h3"
+    elif heading.startswith("#### "):
+        return "h4"
+    elif heading.startswith("##### "):
+        return "h5"
+    elif heading.startswith("###### "):
+        return "h6"
+
+
 def get_content(blockType, block):
     """
     Extracts the content of a block based on the block type
@@ -244,7 +249,7 @@ def get_content(blockType, block):
     if blockType == BlockType.PARAGRAPH:
         return block.replace("\n", " ")
     elif blockType == BlockType.HEADING:
-        return re.findall(r"^#{1,6} +(.+)", block)
+        return re.findall(r"^#{1,6} +(.+)", block, re.MULTILINE)
     elif blockType == BlockType.CODE:
         content = re.findall(r"^```(.*?)```$", block, re.DOTALL)
         raw_content = content[0]
@@ -260,18 +265,26 @@ def get_content(blockType, block):
 def block_to_ParentNode(blockType, block):
     """
     Takes a block of markdown and its block type, 
-    extracts the content and creates a section level ParentNode
+    extracts the content and returns a ParentNode
     """
+
     if blockType == BlockType.PARAGRAPH:
         text = get_content(blockType, block)
         children = text_to_children(text)
         return ParentNode("p", children)
     
     elif blockType == BlockType.HEADING:
-        heading_text = get_content(blockType, block)
-        tag = get_heading_html(block)
-        children = text_to_children(heading_text[0])
-        return ParentNode(tag, children)
+        new_block = [block]
+        children_list = [] 
+        for element in new_block:
+            headings = element.split("\n")
+        for heading in headings:
+            tag = get_heading_html(heading)
+            heading_text = get_content(blockType, heading)
+            child = text_to_children(heading_text[0])
+            child[0].tag = tag
+            children_list.append(child[0])
+        return children_list
     
     elif blockType == BlockType.CODE:
         children_list = []
@@ -283,11 +296,13 @@ def block_to_ParentNode(blockType, block):
     
     elif blockType == BlockType.QUOTE:
         content = get_content(blockType, block)
+        for i in range(len(content) - 1):
+            content[i] = content[i] + " "
         children_list = []
         for element in content:
-            result = text_to_children(element)
-            for content in result:
-                children_list.append(content)
+            nodes = text_to_children(element)
+            for node in nodes:
+                children_list.append(node)
         return ParentNode("blockquote", children_list)
     
     elif blockType == BlockType.UNORDERED_LIST:
@@ -316,8 +331,20 @@ def markdown_to_html_node(markdown):
     blocks_markdown = markdown_to_blocks(markdown)
     children_list = []
     for block in blocks_markdown:
-        block_type = block_to_block_type(block)
+        block_type = block_to_block_type(block) 
         parent = block_to_ParentNode(block_type, block)
-        children_list.append(parent)
+        if isinstance(parent, list):
+            children_list.extend(parent)
+        else:
+            children_list.append(parent)
     return ParentNode("div", children_list)
 
+
+
+md = """
+# Heading level 1
+## Heading level 2
+### Heading level 3
+"""
+node = markdown_to_html_node(md)
+print(node.to_html())
