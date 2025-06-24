@@ -537,6 +537,16 @@ a _word_ in italic
             )
 
 
+    def test_markdown_to_html_empty(self):
+        md = """
+
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div></div>"
+        )
 
 
 if __name__ == "__main__":
