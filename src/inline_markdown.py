@@ -331,20 +331,12 @@ def markdown_to_html_node(markdown):
     blocks_markdown = markdown_to_blocks(markdown)
     children_list = []
     for block in blocks_markdown:
-        block_type = block_to_block_type(block) 
-        parent = block_to_ParentNode(block_type, block)
-        if isinstance(parent, list):
-            children_list.extend(parent)
-        else:
-            children_list.append(parent)
+        if block != "":
+            block_type = block_to_block_type(block) 
+            parent = block_to_ParentNode(block_type, block)
+            if isinstance(parent, list):
+                children_list.extend(parent)
+            else:
+                children_list.append(parent)
     return ParentNode("div", children_list)
 
-
-
-md = """
-# Heading level 1
-## Heading level 2
-### Heading level 3
-"""
-node = markdown_to_html_node(md)
-print(node.to_html())
