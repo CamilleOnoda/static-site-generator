@@ -1,9 +1,12 @@
 from shutil import rmtree, copy2
 from pathlib import Path
+from inline_markdown import markdown_to_html_node
+import os
 
 
 def main():
     copy_static_to_public()
+    generate_page("content/index.md", "template.html", "public/index.html")
 
 
 def copy_static_to_public():
@@ -34,6 +37,35 @@ def copy_directory_contents(src_dir, dest_dir):
             print(f"file not found: {src_item}")
         except Exception as e:
             print(f"Error with {src_item}: {e}")
+
+
+def extract_title(markdown):
+    lines = markdown.splitlines()
+    for line in lines:
+        if line.startswith("# "):
+            text = markdown.split("# ")
+            title = text[1].split("\n\n")
+            return title[0].strip()
+
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    
+    with open(from_path) as file:
+        markdown_content = file.read()
+        
+    with open(template_path) as file:
+        template_content = file.read()
+
+    title = extract_title(markdown_content)
+    node = markdown_to_html_node(markdown_content)
+    html = node.to_html()
+    final_template = template_content.replace("{{ Title }}", title).replace(
+        "{{ Content }}", html)
+
+    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+    with open(dest_path, 'w') as file:
+        file.write(final_template)
 
 
 main()
