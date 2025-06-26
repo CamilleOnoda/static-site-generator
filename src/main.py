@@ -1,46 +1,50 @@
 from shutil import rmtree, copy2
 from pathlib import Path
 from inline_markdown import markdown_to_html_node
-import os
+import os, sys
 
 
 def main():
-    copy_static_to_public()
-    copy_content_to_public()
-    generate_pages("content/index.md", "template.html", "public/index.html")
+    if not sys.argv[1]:
+        basepath = "/"
+    else:
+        basepath = sys.argv[1]
+
+    copy_static_to_docs(basepath)
+    copy_content_to_docs(basepath)
+    generate_pages("content/index.md", "template.html", "docs/index.html", basepath)
 
 
-def copy_static_to_public():
+def copy_static_to_docs(basepath):
     source = Path("/home/onodac/workspace/github.com/CamilleOnoda/static-site-generator/static")
-    destination = Path("/home/onodac/workspace/github.com/CamilleOnoda/static-site-generator/public")
+    destination = Path("/home/onodac/workspace/github.com/CamilleOnoda/static-site-generator/docs")
 
     if destination.exists():
         rmtree(destination)
     destination.mkdir(parents=True, exist_ok=True)
 
-    copy_directory_contents(source, destination)
+    copy_directory_contents(source, destination, basepath)
 
 
-def copy_content_to_public():
+def copy_content_to_docs(basepath):
     source = Path("/home/onodac/workspace/github.com/CamilleOnoda/static-site-generator/content")
-    destination = Path("/home/onodac/workspace/github.com/CamilleOnoda/static-site-generator/public")
+    destination = Path("/home/onodac/workspace/github.com/CamilleOnoda/static-site-generator/docs")
 
-    copy_directory_contents(source, destination)
+    copy_directory_contents(source, destination, basepath)
 
 
-def copy_directory_contents(src_dir, dest_dir):
+def copy_directory_contents(src_dir, dest_dir, basepath):
     for src_item in src_dir.iterdir():
-        print(src_item.name)
         dest_item = dest_dir / src_item.name
 
         try:
             if src_item.is_dir():
                 dest_item.mkdir(exist_ok=True)
-                copy_directory_contents(src_item, dest_item)
+                copy_directory_contents(src_item, dest_item, basepath)
             elif src_item.suffix.lower() == ".md":
                 new_extension = ".html"
                 new_html = dest_item.with_suffix(new_extension)
-                generate_pages(src_item, "template.html", new_html)
+                generate_pages(src_item, "template.html", new_html, basepath)
             else:
                 copy2(src_item, dest_item)
 
@@ -61,7 +65,7 @@ def extract_title(markdown):
             return title[0].strip()
 
 
-def generate_pages(from_path, template_path, dest_path):
+def generate_pages(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     
     with open(from_path) as file:
@@ -73,8 +77,11 @@ def generate_pages(from_path, template_path, dest_path):
     title = extract_title(markdown_content)
     node = markdown_to_html_node(markdown_content)
     html = node.to_html()
-    final_template = template_content.replace("{{ Title }}", title).replace(
+    new_template = template_content.replace("{{ Title }}", title).replace(
         "{{ Content }}", html)
+
+    final_template = new_template.replace('href="/"', 'href="{basepath}').replace(
+        'src="/', 'src="{basepath}')
 
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     with open(dest_path, 'w') as file:
