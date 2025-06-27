@@ -80,8 +80,8 @@ def generate_pages(from_path, template_path, dest_path, basepath):
     new_template = template_content.replace("{{ Title }}", title).replace(
         "{{ Content }}", html)
 
-    final_template = new_template.replace('href="/"', 'href="{basepath}').replace(
-        'src="/', 'src="{basepath}')
+    final_template = new_template.replace('href="/', f'href="{basepath}').replace(
+        'src="/', f'src="{basepath}')
 
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     with open(dest_path, 'w') as file:
