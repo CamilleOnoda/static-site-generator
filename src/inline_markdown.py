@@ -21,11 +21,7 @@ def text_to_textnodes(text):
     """
     initial_TextNode = TextNode(text, TextType.TEXT)
     new_TextNode = split_nodes_delimiter([initial_TextNode], "**", TextType.BOLD)
-    new_TextNode = split_nodes_delimiter(new_TextNode, "__", TextType.BOLD)
-
     new_TextNode = split_nodes_delimiter(new_TextNode, "_", TextType.ITALIC)
-    new_TextNode = split_nodes_delimiter(new_TextNode, "*", TextType.ITALIC)
-
     new_TextNode = split_nodes_delimiter(new_TextNode, "`", TextType.CODE)
 
     for node in new_TextNode:
