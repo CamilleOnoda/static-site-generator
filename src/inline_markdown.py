@@ -266,21 +266,14 @@ def block_to_ParentNode(blockType, block):
 
     if blockType == BlockType.PARAGRAPH:
         text = get_content(blockType, block)
-        children = text_to_children(text)
-        return ParentNode("p", children)
+        children_list = text_to_children(text)
+        return ParentNode("p", children_list)
     
     elif blockType == BlockType.HEADING:
-        new_block = [block]
-        children_list = [] 
-        for element in new_block:
-            headings = element.split("\n")
-        for heading in headings:
-            tag = get_heading_html(heading)
-            heading_text = get_content(blockType, heading)
-            child = text_to_children(heading_text[0])
-            child[0].tag = tag
-            children_list.append(child[0])
-        return children_list
+        tag = get_heading_html(block)
+        heading_text = get_content(blockType, block)
+        children_list = text_to_children(heading_text[0])
+        return ParentNode(tag, children_list)
     
     elif blockType == BlockType.CODE:
         children_list = []
