@@ -64,46 +64,42 @@ This project is configured to work with Github pages:
 
 [View the live site](https://camilleonoda.github.io/static-site-generator/)
 
-## What I learned
-
-Building this static site generator was a comprehensive learning experience that taught me:
-
 ## What I Learned
 
 Building this static site generator was a comprehensive learning experience that taught me:
 
-### Test-Driven Development (TDD)
+### _Test-Driven Development_ (TDD)
 - **Writing tests first** to define exactly what my functions should accomplish
 - **Red-Green-Refactor cycle**: Writing failing tests, making them pass, then improving the code. _Red_ forces clarity, _Green_ builds confidence and _Refactor_ improves code quality without fear of breaking it.
 - **Breaking down complex problems** into small, testable units
 - **Focusing on requirements**: Tests helped me stay focused on what I actually needed to build
 - **Code confidence**: Having tests made refactoring and improvements much safer
 
-### Testing Best Practices
+### _Testing Best Practices_
 - **Unit testing**: Testing individual functions in isolation
 - **Test organization**: Structuring test files and keeping tests maintainable
 - **Edge case handling**: Thinking through what could go wrong and testing for it
 - **Debugging through tests**: Using failing tests to pinpoint exactly where issues occur
 
-### Code Quality & Design
+### _Code Quality and Design_
 - **Keeping functions simple**: TDD naturally led to smaller, more focused functions
 - **Better code organization**: Writing testable code forced better separation of concerns
 - **Understanding my own code**: Writing tests made me think deeply about what each piece does
 - **Maintainable architecture**: Tests acted as documentation for how my code should behave
 
-### Core Programming Concepts
+### _Core Programming Concepts_
 - **File system operations**: Reading, writing, and organizing files programmatically
 - **Recursive algorithms**: Traversing directory structures to process nested content
 - **String manipulation**: Parsing Markdown syntax and generating clean HTML
 - **Object-oriented programming**: Structuring code with classes and methods for maintainability
 
-### Python-Specific Skills
+### _Python-Specific Skills_
 - **Testing frameworks**: Using Python's built-in `unittest` module
 - **Path handling** with `pathlib` for cross-platform compatibility
 - **Exception handling** for robust file operations
 - **Module organization** and code separation for cleaner architecture
 
-### Development Workflow
+### _Development Workflow_
 - **Command-line applications**: Building tools that can be run from the terminal
 - **Version control**: Managing code changes and project history with Git
 - **Deployment**: Setting up GitHub Pages for web hosting
