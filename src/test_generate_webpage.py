@@ -1,5 +1,5 @@
 import unittest
-from main import extract_title
+from generate_content import extract_title
 
 
 class TestGeneratePage(unittest.TestCase):
@@ -20,13 +20,6 @@ Here's the deal, **I like Tolkien**.
             text,
             "Tolkien Fan Club"
         )
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
